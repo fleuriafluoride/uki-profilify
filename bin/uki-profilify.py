@@ -38,7 +38,6 @@ if __name__ == '__main__':
         if args.config \
         else "/etc/uki-profilify/{}.toml".format(name)
     # # then load it
-    config = None
     with open(config_file, 'rb') as f:
         config = tomllib.load(f)
     # # add 'options' if nonexistent, to avoid erroring in next steps
