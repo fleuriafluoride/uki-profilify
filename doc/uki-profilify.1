@@ -15,7 +15,7 @@ uki-profilify \- Multi-profile UKI creation helper
 .SH DESCRIPTION
 .B uki-profilify
 creates a multi-profile UKI using
-.MR systemd-ukify 8
+.MR ukify 1
 by adding profiles to
 .I uki-in
 as specified by a TOML configuration file.
@@ -56,7 +56,7 @@ and an array of tables
 specifies the profiles to be generated, while
 .I options
 contains the command line arguments to be passed to
-.MR systemd-ukify 8
+.MR ukify 1
 when generating the complete UKI.
 
 A profile in
@@ -71,9 +71,9 @@ PE section. It should also have a
 .I sections
 subtable containing the PE sections to be added to the profile; its entries
 are directly passed as command line arguments to
-.MR systemd-ukify 8 ,
+.MR ukify 1 ,
 thus the keys use the names of
-.MR systemd-ukify 8 \'s
+.MR ukify 1 \'s
 configuration options.
 
 .SH EXAMPLES
@@ -118,11 +118,11 @@ and
 .I profiles.sections
 tables in the configuration
 directly as command line arguments to
-.MR systemd-ukify 8
+.MR ukify 1
 without checking their validity. This lets
 .B uki-profilify
 handle options added in future versions of
-.MR systemd-ukify 8 ,
+.MR ukify 1 ,
 but this may lead to errors if the keys are not valid options.
 
 If using
@@ -139,7 +139,7 @@ Note that in this scenario there is no reason to generate a UKI file for
 the fallback preset.
 
 .SH SEE ALSO
-.MR systemd-ukify 8
+.MR ukify 1
 
 .SH AUTHORS
 .MT fleuria@posteo.co
