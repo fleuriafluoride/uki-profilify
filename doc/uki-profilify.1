@@ -69,7 +69,7 @@ to be included in the contents of the
 .B .profile
 PE section. It should also have a
 .I sections
-subtable containing the PE sections to be added to the profile; its attributes
+subtable containing the PE sections to be added to the profile; its entries
 are directly passed as command line arguments to
 .MR systemd-ukify 8 ,
 thus the keys use the names of
@@ -112,7 +112,7 @@ on all newly generated UKIs.
 
 .SH BUGS
 .B uki-profilify
-will pass all attributes in the
+will pass all entries in the
 .I options
 and
 .I profiles.sections
@@ -123,7 +123,7 @@ without checking their validity. This lets
 .B uki-profilify
 handle options added in future versions of
 .MR systemd-ukify 8 ,
-but this may lead to errors if the attributes are not valid options.
+but this may lead to errors if the keys are not valid options.
 
 If using
 .B uki-profilify
