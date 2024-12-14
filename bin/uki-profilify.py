@@ -48,9 +48,11 @@ if __name__ == '__main__':
     if args.output:
         config['options']['output'] = args.output
     # # sanity check: does the output directory actually exist?
-    outdir = os.path.dirname(config['options']['output'])
-    if not os.path.isdir(outdir):
-        raise FileNotFoundError("{} is not a valid directory".format(outdir))
+    if 'output' in config['options']:
+        outdir = os.path.dirname(config['options']['output'])
+        if not os.path.isdir(outdir):
+            raise FileNotFoundError("{} is not a valid directory"
+                                    .format(outdir))
 
     # generate profiles
     pass
