@@ -1,0 +1,147 @@
+\# uki-profilify.1: man page for uki-profilify
+\#
+\# Copyright 2024 Fleuria
+\# SPDX-License-Identifier: Apache-2.0
+
+.TH UKI-PROFILIFY 1 "14 December 2024"
+.SH NAME
+uki-profilify \- Multi-profile UKI creation helper
+
+.SH SYNOPSIS
+.SY
+\fBuki-profilify\fR [\fIoptions\fR] \fIuki-in\fR
+.YS
+
+.SH DESCRIPTION
+.B uki-profilify
+creates a multi-profile UKI using
+.MR systemd-ukify 8
+by adding profiles to
+.I uki-in
+as specified by a TOML configuration file.
+
+.SH OPTIONS
+.TP
+\fB-c\fR \fIconfig\fR, \fB--config=\fIconfig\fR
+Use
+.I config
+as the configuration file.
+
+.TP
+\fB-o\fR \fIuki-out\fR, \fB--output=\fIuki-out\fR
+Save the resulting UKI as
+.IR uki-out .
+
+.TP
+\fB-h\fR, \fB--help\fR
+Show help message and exit.
+
+.SH CONFIGURATION
+A default
+.B uki-profilify
+configuration file is stored as /etc/uki-profilify/\fIpreset\fR.toml, and is
+automatically used when
+.I uki-in
+has the name \fIpreset\fR.\fIext\fR (it does not matter what
+.I ext
+is) and
+.B --config
+is not set.
+
+The configuration file is a TOML file with the table
+.IR options ,
+and an array of tables
+.IR profiles .
+.I profiles
+specifies the profiles to be generated, while
+.I options
+contains the command line arguments to be passed to
+.MR systemd-ukify 8
+when generating the complete UKI.
+
+A profile in
+.I profiles
+can contain the metainformation fields
+.I id
+and
+.I title
+to be included in the contents of the
+.B .profile
+PE section. It should also have a
+.I sections
+subtable containing the PE sections to be added to the profile; its attributes
+are directly passed as command line arguments to
+.MR systemd-ukify 8 ,
+thus the keys use the names of
+.MR systemd-ukify 8 \'s
+configuration options.
+
+.SH EXAMPLES
+Create a UKI for Arch Linux with default and fallback profiles, and save the
+UKI to /efi/EFI/Arch/archlinux.efi:
+.TP
+.B Configuration: /etc/uki-profilify/linux.toml
+.EX
+[options]
+output = "/efi/EFI/Arch/archlinux.efi"
+
+[[profiles]]
+id = "default"
+title = "Boot using default options"
+[profiles.sections]
+cmdline = "root=PARTLABEL=arch rw quiet splash"
+
+[[profiles]]
+id = "fallback"
+title = "Boot using fallback initramfs"
+[profiles.sections]
+cmdline = "root=PARTLABEL=arch rw"
+initrd = "/boot/initramfs-linux-fallback.img"
+.EE
+.TP
+.B Invocation
+.EX
+# uki-profilify linux.efi
+.EE
+.IP
+If
+.MR mkinitcpio 8
+is configured to make UKIs, the post hook should automatically run
+.B uki-profilify
+on all newly generated UKIs.
+
+.SH BUGS
+.B uki-profilify
+will pass all attributes in the
+.I options
+and
+.I profiles.sections
+tables in the configuration
+directly as command line arguments to
+.MR systemd-ukify 8
+without checking their validity. This lets
+.B uki-profilify
+handle options added in future versions of
+.MR systemd-ukify 8 ,
+but this may lead to errors if the attributes are not valid options.
+
+If using
+.B uki-profilify
+with the
+.MR mkinitcpio 8
+post hook, make sure that the files required for generating the profiles (eg
+the fallback initrd) are generated before the UKI file. This may be done by, eg,
+generating the fallback preset before the default preset:
+.RS
+PRESETS=('fallback' 'default')
+.RE
+Note that in this scenario there is no reason to generate a UKI file for
+the fallback preset.
+
+.SH SEE ALSO
+.MR systemd-ukify 8
+
+.SH AUTHORS
+.MT fleuria@posteo.co
+Fleuria
+.ME
