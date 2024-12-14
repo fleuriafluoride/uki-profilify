@@ -12,16 +12,15 @@ import tomllib
 
 # UKI writers
 
-# argument parsing
-parser = argparse.ArgumentParser()
-parser.add_argument('input', metavar='uki-in')
-parser.add_argument('-c', '--config', metavar='config',
-                    help='configuration file')
-parser.add_argument('-o', '--output', metavar='uki-out',
-                    help='UKI output filename')
-
 if __name__ == '__main__':
-    # parse options
+    # argument parsing
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input', metavar='uki-in')
+    parser.add_argument('-c', '--config', metavar='config',
+                        help='configuration file')
+    parser.add_argument('-o', '--output', metavar='uki-out',
+                        help='UKI output filename')
+    # # parse options
     args = parser.parse_args()
 
     # handle inputs
