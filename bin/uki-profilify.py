@@ -113,12 +113,11 @@ if __name__ == '__main__':
     check_if_file(conf_uki['initrd'])
 
     # generate some UKIs!
-    conf_profs = config['profiles']
     with tempfile.TemporaryDirectory() as tmpd:
         # first, profiles
         counter = itertools.count()
         profile_files = [build_profile(profile, number, tmpd)
-                         for profile in conf_profs
+                         for profile in config['profiles']
                          for number in [next(counter)]]
 
         # then, the complete UKI
