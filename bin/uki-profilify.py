@@ -26,13 +26,13 @@ def check_if_dir_viable(outpath):
         raise FileNotFoundError("No such directory: {}".format(dir))
 
 
-def default_if_none(var, default):
-    return var if var is not None else default
-
-
 def set_if_not_none(dict, key, newval):
     if newval is not None:
         dict[key] = newval
+
+
+def default_if_none(var, default):
+    return var if var is not None else default
 
 
 # extracted code segments
