@@ -80,7 +80,8 @@ def build_profile(profile, number, dir):
     print(dir)
 
 
-def build_multiprofile_uki(conf_uki, profiles):
+def build_multiprofile_uki(kernel, conf_uki, profiles):
+    print(kernel)
     print(conf_uki)
     print(profiles)
 
@@ -121,4 +122,4 @@ if __name__ == '__main__':
             profile_files.append(build_profile(profile, next(counter), tmpd))
 
         # then, the complete UKI
-        build_multiprofile_uki(conf_uki, profile_files)
+        build_multiprofile_uki(args.kernel, conf_uki, profile_files)
