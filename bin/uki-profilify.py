@@ -80,6 +80,11 @@ def build_profile(profile, number, dir):
     print(dir)
 
 
+def build_multiprofile_uki(conf_uki, profiles):
+    print(conf_uki)
+    print(profiles)
+
+
 # the main code
 
 if __name__ == '__main__':
