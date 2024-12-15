@@ -9,28 +9,31 @@ uki-profilify \- Multi-profile UKI creation helper
 
 .SH SYNOPSIS
 .SY
-\fBuki-profilify\fR [\fIoptions\fR] \fIuki-in\fR
+\fBuki-profilify\fR [\fIoptions\fR] \fIkernel\fR [\fIinitramfs\fR]
 .YS
 
 .SH DESCRIPTION
 .B uki-profilify
 creates a multi-profile UKI using
 .MR ukify 1
-by adding profiles to
-.I uki-in
 as specified by a TOML configuration file.
 
 .SH OPTIONS
 .TP
-\fB-c\fR \fIconfig\fR, \fB--config=\fIconfig\fR
+\fB-a\fR, \fB--auto\fR
+Set automatic generation mode (see
+.BR CONFIGURATION ).
+
+.TP
+\fB-c\fR \fIconf\fR, \fB--config=\fIconf\fR
 Use
-.I config
+.I conf
 as the configuration file.
 
 .TP
-\fB-o\fR \fIuki-out\fR, \fB--output=\fIuki-out\fR
-Save the resulting UKI file as
-.IR uki-out .
+\fB-o\fR \fIfilepath\fR, \fB--output=\fIfilepath\fR
+Save the resulting UKI file to
+.IR filepath .
 
 .TP
 \fB-h\fR, \fB--help\fR
@@ -40,32 +43,40 @@ Show help message and exit.
 A default
 .B uki-profilify
 configuration file is stored as /etc/uki-profilify/\fIpreset\fR.toml, and is
-automatically used when
-.I uki-in
-has the name \fIpreset\fR.efi and
+used when
+.I kernel
+contains the substring
+.I preset
+and
 .B --config
-is not set.
+is not set. If
+.I kernel
+contains multiple valid
+.I preset
+substrings, the longest
+.I preset
+takes precedence. 
 
-The configuration file is a TOML file with the table
-.IR options ,
+The configuration file is a TOML file with a table
+.I uki
 and an array of tables
 .IR profiles .
 .I profiles
 specifies the profiles to be generated, while
-.I options
+.I uki
 contains the command line arguments to be passed to
 .MR ukify 1
 when generating the complete UKI.
 
 A profile in
 .I profiles
-can contain the metainformation fields
+may contain the metainformation fields
 .I id
 and
 .I title
 to be included in the contents of the
 .B .profile
-PE section. It should also have a
+PE section. It can also contain a
 .I sections
 subtable containing the PE sections to be added to the profile; its entries
 are directly passed as command line arguments to
@@ -74,44 +85,64 @@ thus the keys use the names of
 .MR ukify 1 \'s
 configuration options.
 
+If
+.I initramfs
+is provided and differs from
+.I uki.initrd
+in the configuration, it will override
+.I uki.initrd
+when
+.B -a
+is not set. However, if
+.B -a
+is set,
+.B uki-profilify
+will not generate a UKI. This behaviour allows
+.B uki-profilify
+to work nicely with
+.MR mkinitcpio 8 .
+
 .SH EXAMPLES
 Create a UKI for Arch Linux with default and fallback profiles, and save the
-UKI to /efi/EFI/Arch/archlinux.efi:
+UKI to /efi/EFI/Arch/linux.efi:
 .TP
 .B Configuration: /etc/uki-profilify/linux.toml
 .EX
-[options]
-output = "/efi/EFI/Arch/archlinux.efi"
+[uki]
+output = "/efi/EFI/Arch/linux.efi"
+initrd = "/boot/initramfs-linux.img"
+cmdline = "root=PARTLABEL=arch rw quiet splash"
 
 [[profiles]]
 id = "default"
 title = "Boot using default options"
-[profiles.sections]
-cmdline = "root=PARTLABEL=arch rw quiet splash"
+# the default profile doesn\'t need to have any sections
 
 [[profiles]]
 id = "fallback"
 title = "Boot using fallback initramfs"
 [profiles.sections]
-cmdline = "root=PARTLABEL=arch rw"
 initrd = "/boot/initramfs-linux-fallback.img"
+cmdline = "root=PARTLABEL=arch rw"
 .EE
 .TP
 .B Invocation
 .EX
-# uki-profilify linux.efi
+# uki-profilify /boot/vmlinuz-linux
 .EE
 .IP
-If
+If using
 .MR mkinitcpio 8
-is configured to make UKIs, the post hook should automatically run
+as the initramfs generator, the post hook will run
 .B uki-profilify
-on all newly generated UKIs.
+automatically with
+.B -a
+set.
 
 .SH BUGS
 .B uki-profilify
 will pass all entries in the
-.I options
+.I uki
 and
 .I profiles.sections
 tables in the configuration
@@ -127,14 +158,15 @@ If using
 .B uki-profilify
 with the
 .MR mkinitcpio 8
-post hook, make sure that the files required for generating the profiles (eg
-the fallback initrd) are generated before the UKI file. This may be done by, eg,
-generating the fallback preset before the default preset:
+post hook, make sure that the files required for the UKI (eg the fallback
+initrd) have all been generated when
+.B uki-profilify
+is run. In the example in
+.BR EXAMPLES ,
+this entails generating the fallback preset before the default preset:
 .RS
 PRESETS=('fallback' 'default')
 .RE
-Note that in this scenario there is no reason to generate a UKI file for
-the fallback preset.
 
 .SH SEE ALSO
 .MR ukify 1
