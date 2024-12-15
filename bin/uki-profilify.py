@@ -5,7 +5,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
+import itertools
 import os
+import subprocess
+import tempfile
 import tomllib
 
 _config_dir = '/etc/uki-profilify'
@@ -38,37 +41,43 @@ def default_if_none(var, default):
 # extracted code segments
 
 
-def _set_args(aparser):
-    aparser.add_argument('kernel')
-    aparser.add_argument('initramfs', nargs='?')
-    aparser.add_argument('-a', '--auto', action='store_true',
-                         help='set automatic mode')
-    aparser.add_argument('-c', '--config', metavar='conf',
-                         help='configuration file')
-    aparser.add_argument('-o', '--output', metavar='filepath',
-                         help='UKI output filename')
+def _set_args(parser):
+    parser.add_argument('kernel')
+    parser.add_argument('initramfs', nargs='?')
+    parser.add_argument('-a', '--auto', action='store_true',
+                        help='set automatic mode')
+    parser.add_argument('-c', '--config', metavar='conf',
+                        help='configuration file')
+    parser.add_argument('-o', '--output', metavar='filepath',
+                        help='UKI output filename')
 
 
-def _find_config(akernel):
+def _find_config(kernel):
     confs = [name
              for entry in os.scandir(_config_dir)
              if entry.is_file()
-             for (name, ext) in [os.path.splitext(entry.name)]
+             for name, ext in [os.path.splitext(entry.name)]
              if ext == '.toml']
     confs.sort(key=len, reverse=True)
     for c in confs:
-        if c in akernel:
+        if c in kernel:
             return _config_dir + "/{}.toml".format(c)
     # no configuration exists; exit now
-    print("No configuration file found for {}, exiting".format(akernel))
+    print("No configuration file found for {}, exiting".format(kernel))
     sys.exit()
 
 
-def _enforce_auto_flag(aargs, auki):
-    if aargs.auto:
-        if auki['initrd'] != aargs.initramfs:
+def _enforce_auto_flag(args, uki):
+    if args.auto:
+        if uki['initrd'] != aargs.initramfs:
             print('initramfs does not match in auto mode, exiting')
             sys.exit()
+
+
+def build_profile(profile, number, dir):
+    print(profile)
+    print(number)
+    print(dir)
 
 
 # the main code
@@ -97,8 +106,15 @@ if __name__ == '__main__':
     check_if_dir_viable(conf_uki['output'])
     check_if_file(conf_uki['initrd'])
 
-    # generate profiles
-    pass
+    # generate some UKIs!
+    conf_profs = config['profiles']
+    with tempfile.TemporaryDirectory() as tmpd:
+        # first, profiles
+        counter = itertools.count()
+        profile_files = []
+        for profile in conf_profs:
+            number = next(counter)
+            profiles_files.append(build_profile(profile, number, tmpd))
 
-    # create UKI
-    pass
+        # then, the complete UKI
+        build_multiprofile_uki(conf_uki, profiles_files)
