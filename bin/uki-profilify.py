@@ -118,8 +118,7 @@ if __name__ == '__main__':
         counter = itertools.count()
         profile_files = []
         for profile in conf_profs:
-            number = next(counter)
-            profiles_files.append(build_profile(profile, number, tmpd))
+            profile_files.append(build_profile(profile, next(counter), tmpd))
 
         # then, the complete UKI
-        build_multiprofile_uki(conf_uki, profiles_files)
+        build_multiprofile_uki(conf_uki, profile_files)
