@@ -117,9 +117,9 @@ if __name__ == '__main__':
     with tempfile.TemporaryDirectory() as tmpd:
         # first, profiles
         counter = itertools.count()
-        profile_files = []
-        for profile in conf_profs:
-            profile_files.append(build_profile(profile, next(counter), tmpd))
+        profile_files = [build_profile(profile, number, tmpd)
+                         for profile in conf_profs
+                         for number in [next(counter)]]
 
         # then, the complete UKI
         build_multiprofile_uki(args.kernel, conf_uki, profile_files)
