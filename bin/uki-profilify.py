@@ -8,6 +8,7 @@ import argparse
 import itertools
 import os
 import subprocess
+import sys
 import tempfile
 import tomllib
 
