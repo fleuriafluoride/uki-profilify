@@ -83,7 +83,7 @@ def _find_config(kernel):
 
 def _enforce_auto_flag(args, uki):
     if args.auto:
-        if uki['initrd'] != aargs.initramfs:
+        if uki['initrd'] != args.initramfs:
             print('initramfs does not match in auto mode, exiting')
             sys.exit()
 
