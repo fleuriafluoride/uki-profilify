@@ -16,10 +16,10 @@ _config_dir = '/etc/uki-profilify'
 # helpers
 
 
-def check_if_file(apath):
-    if apath is None:
+def check_if_file(path):
+    if path is None:
         return  # do nothing
-    if not os.path.isfile(apath):
+    if not os.path.isfile(path):
         raise FileNotFoundError("No such file: {}".format(apath))
 
 
@@ -96,8 +96,7 @@ def build_profile(profile, number, dir):
         output = header
     else:
         output = dir + "/{}.efi".format(number)
-        _run_ukify(profile.get('sections', {})
-                   | {'output': output, 'profile': header})
+        _run_ukify(profile.get('sections', {}) | {'output': output}, [header])
     return output
 
 
@@ -131,15 +130,13 @@ if __name__ == '__main__':
     check_if_dir_viable(conf_uki['output'])
     check_if_file(conf_uki['initrd'])
 
-    # generate some UKIs!
+    # generate the UKI!
     with tempfile.TemporaryDirectory() as tmpd:
-        # first, profiles
         print('Generating profiles...')
         counter = itertools.count()
         profile_files = [build_profile(profile, number, tmpd)
                          for profile in config['profiles']
                          for number in [next(counter)]]
 
-        subprocess.run(['ls', '-lh', tmpd])
-        # then, the complete UKI
+        print('Profiles done, generating UKI...')
         build_multiprofile_uki(args.kernel, conf_uki, profile_files)
