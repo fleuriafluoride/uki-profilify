@@ -116,7 +116,7 @@ cmdline = "root=PARTLABEL=arch rw quiet splash"
 [[profiles]]
 id = "default"
 title = "Boot using default options"
-# the default profile doesn\'t need to have any sections
+# first profile cannot have sections: see BUGS
 
 [[profiles]]
 id = "fallback"
@@ -167,6 +167,13 @@ this entails generating the fallback preset before the default preset:
 .RS
 PRESETS=('fallback' 'default')
 .RE
+
+As of systemd version 257,
+.MR ukify 1
+is coded as to not allow the first profile to have any sections.
+If sections are provided for the first profile,
+.B uki-profilify
+will ignore it.
 
 .SH SEE ALSO
 .MR ukify 1

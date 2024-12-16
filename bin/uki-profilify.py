@@ -38,6 +38,20 @@ def default_if_none(var, default):
     return var if var is not None else default
 
 
+def _profile_header(profile):
+    headers = {k: profile[k] for k in ['id', 'title']}
+    header_str = '\n'.join(["{}={}".format(k.upper(), v)
+                           for k, v in headers.items()])
+    return header_str
+
+
+def _run_ukify(args, profiles=[]):
+    subprocess.run(['ukify', 'build']
+                   + ["--{}={}".format(k, v) for k, v in args.items()]
+                   + ["--profile={}".format(p) for p in profiles[0:1]]
+                   + ["--join-profile={}".format(p) for p in profiles[1:]])
+
+
 # extracted code segments
 
 
@@ -75,15 +89,20 @@ def _enforce_auto_flag(args, uki):
 
 
 def build_profile(profile, number, dir):
-    print(profile)
-    print(number)
-    print(dir)
+    header = _profile_header(profile)
+    # ukify is weird: first profile must consist of only the header string,
+    # and cannot be imported from a file
+    if number == 0:
+        output = header
+    else:
+        output = dir + "/{}.efi".format(number)
+        _run_ukify(profile.get('sections', {})
+                   | {'output': output, 'profile': header})
+    return output
 
 
 def build_multiprofile_uki(kernel, conf_uki, profiles):
-    print(kernel)
-    print(conf_uki)
-    print(profiles)
+    _run_ukify(conf_uki | {'linux': kernel}, profiles)
 
 
 # the main code
@@ -115,10 +134,12 @@ if __name__ == '__main__':
     # generate some UKIs!
     with tempfile.TemporaryDirectory() as tmpd:
         # first, profiles
+        print('Generating profiles...')
         counter = itertools.count()
         profile_files = [build_profile(profile, number, tmpd)
                          for profile in config['profiles']
                          for number in [next(counter)]]
 
+        subprocess.run(['ls', '-lh', tmpd])
         # then, the complete UKI
         build_multiprofile_uki(args.kernel, conf_uki, profile_files)
