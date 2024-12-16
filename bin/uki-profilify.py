@@ -78,14 +78,16 @@ def _find_config(kernel):
         if c in kernel:
             return _config_dir + "/{}.toml".format(c)
     # no configuration exists; exit now
-    print("No configuration file found for {}, exiting".format(kernel))
+    print("No configuration file found for {}, exiting".format(kernel),
+          file=sys.stderr)
     sys.exit()
 
 
 def _enforce_auto_flag(args, uki):
     if args.auto:
         if uki['initrd'] != args.initramfs:
-            print('initramfs does not match in auto mode, exiting')
+            print('initramfs does not match in auto mode, exiting',
+                  file=sys.stderr)
             sys.exit()
 
 
@@ -133,11 +135,11 @@ if __name__ == '__main__':
 
     # generate the UKI!
     with tempfile.TemporaryDirectory() as tmpd:
-        print('Generating profiles...')
+        print('Generating profiles...', file=sys.stderr)
         counter = itertools.count()
         profile_files = [build_profile(profile, number, tmpd)
                          for profile in config['profiles']
                          for number in [next(counter)]]
 
-        print('Profiles done, generating UKI...')
+        print('Profiles done, generating UKI...', file=sys.stderr)
         build_multiprofile_uki(args.kernel, conf_uki, profile_files)
