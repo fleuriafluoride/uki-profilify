@@ -25,6 +25,8 @@ def check_if_file(path):
 
 
 def check_if_dir_viable(outpath):
+    if outpath is None:
+        return  # do nothing
     dir = os.path.dirname(outpath)
     if not os.path.isdir(dir):
         raise FileNotFoundError("No such directory: {}".format(dir))
@@ -85,7 +87,7 @@ def _find_config(kernel):
 
 def _enforce_auto_flag(args, uki):
     if args.auto:
-        if uki['initrd'] != args.initramfs:
+        if uki.get('initrd') != args.initramfs:
             print('initramfs does not match in auto mode, exiting',
                   file=sys.stderr)
             sys.exit()
@@ -130,15 +132,15 @@ if __name__ == '__main__':
     _enforce_auto_flag(args, conf_uki)
     set_if_not_none(conf_uki, 'output', args.output)
     set_if_not_none(conf_uki, 'initrd', args.initramfs)
-    check_if_dir_viable(conf_uki['output'])
-    check_if_file(conf_uki['initrd'])
+    check_if_dir_viable(conf_uki.get('output'))
+    check_if_file(conf_uki.get('initrd'))
 
     # generate the UKI!
     with tempfile.TemporaryDirectory() as tmpd:
         print('Generating profiles...', file=sys.stderr)
         counter = itertools.count()
         profile_files = [build_profile(profile, number, tmpd)
-                         for profile in config['profiles']
+                         for profile in config.get('profiles', [])
                          for number in [next(counter)]]
 
         print('Profiles done, generating UKI...', file=sys.stderr)
